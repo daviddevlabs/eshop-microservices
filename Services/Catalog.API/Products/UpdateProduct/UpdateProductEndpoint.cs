@@ -1,4 +1,3 @@
-
 namespace Catalog.API.Products.UpdateProduct;
 
 public record UpdateProductRequest(Guid Id, string Name, List<string> Category, string Description, string ImageFile, decimal Price);
@@ -6,7 +5,7 @@ public record UpdateProductResponse(bool IsSuccess);
 
 public class UpdateProductEndpoint : ICarterModule
 {
-    public async void AddRoutes(IEndpointRouteBuilder app)
+    public void AddRoutes(IEndpointRouteBuilder app)
     {
         app.MapPut("/products", async (UpdateProductRequest request, ISender sender) =>
         {

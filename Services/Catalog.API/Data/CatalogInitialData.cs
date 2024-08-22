@@ -4,15 +4,15 @@ namespace Catalog.API.Data;
 
 public class CatalogInitialData : IInitialData
 {
-    public async Task Populate(IDocumentStore store, CancellationToken cancellation)
+    public async Task Populate(IDocumentStore store, CancellationToken cancellationToken)
     {
         using var session = store.LightweightSession();
 
-        if (await session.Query<Product>().AnyAsync())
+        if (await session.Query<Product>().AnyAsync(cancellationToken))
             return;
 
         session.Store<Product>(GetPreconfiguredProducts());
-        await session.SaveChangesAsync();
+        await session.SaveChangesAsync(cancellationToken);
     }
 
     private static IEnumerable<Product> GetPreconfiguredProducts() => new List<Product>()
