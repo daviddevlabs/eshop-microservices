@@ -13,7 +13,7 @@ COPY . .
 WORKDIR "/src/Services/Discount.Grpc"
 RUN dotnet build "./Discount.Grpc.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
-FROM build as publish
+FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
 RUN dotnet publish "./Discount.Grpc.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
