@@ -1,6 +1,6 @@
 namespace Catalog.API.Products.UpdateProduct;
 
-public record UpdateProductRequest(Guid Id, string Name, List<string> Category, string Description, string ImageFile, decimal Price);
+public record UpdateProductRequest(Guid Id, string Title, string Description, decimal Price, string Category, List<string> ImageUrl, List<Specification> Specifications);
 public record UpdateProductResponse(bool IsSuccess);
 
 public class UpdateProductEndpoint : ICarterModule

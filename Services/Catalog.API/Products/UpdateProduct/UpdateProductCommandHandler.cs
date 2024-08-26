@@ -1,6 +1,6 @@
 namespace Catalog.API.Products.UpdateProduct;
 
-public record UpdateProductCommand(Guid Id, string Name, List<string> Category, string Description, string ImageFile, decimal Price)
+public record UpdateProductCommand(Guid Id, string Title, string Description, decimal Price, string Category, List<string> ImageUrl, List<Specification> Specifications)
     : ICommand<UpdateProductResult>;
 public record UpdateProductResult(bool IsSuccess);
 
@@ -10,9 +10,9 @@ public class UpdateProductCommandValidator : AbstractValidator<UpdateProductComm
     {
         RuleFor(command => command.Id).NotEmpty().WithMessage("Product ID is required");
 
-        RuleFor(command => command.Name)
-            .NotEmpty().WithMessage("Name is required")
-            .Length(2, 150).WithMessage("Name must be between 2 and 150 characters");
+        RuleFor(command => command.Title)
+            .NotEmpty().WithMessage("Title is required")
+            .Length(2, 150).WithMessage("Title must be between 2 and 150 characters");
 
         RuleFor(command => command.Price)
             .GreaterThan(0).WithMessage("Price must be greater than 0");
@@ -32,11 +32,12 @@ internal class UpdateProductCommandHandler
             throw new ProductNotFoundException(command.Id);
         };
 
-        product.Name = command.Name;
-        product.Category = command.Category;
+        product.Title = command.Title;
         product.Description = command.Description;
-        product.ImageFile = command.ImageFile;
+        product.Category = command.Category;
         product.Price = command.Price;
+        product.ImageUrl = command.ImageUrl;
+        product.Specifications = command.Specifications;
 
         session.Update(product);
         await session.SaveChangesAsync(cancellationToken);

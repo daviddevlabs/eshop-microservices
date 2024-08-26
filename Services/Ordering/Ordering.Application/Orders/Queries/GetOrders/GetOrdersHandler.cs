@@ -11,11 +11,12 @@ public class GetOrdersHandler(IApplicationDbContext dbContext)
         var pageSize = query.PaginationRequest.PageSize;
 
         var totalCount = await dbContext.Orders.LongCountAsync(cancellationToken);
+        var totalPages = (int)Math.Ceiling((decimal)totalCount / pageSize);
 
         var orders = await dbContext.Orders
             .Include(o => o.OrderItems)
             .OrderBy(o => o.OrderName.Value)
-            .Skip(pageSize * pageIndex)
+            .Skip(pageSize * (pageIndex - 1))
             .Take(pageSize)
             .ToListAsync(cancellationToken);
 
@@ -24,6 +25,7 @@ public class GetOrdersHandler(IApplicationDbContext dbContext)
                 pageIndex,
                 pageSize,
                 totalCount,
+                totalPages,
                 orders.ToOrderDtoList()));
     }
 }

@@ -40,6 +40,17 @@ services:
     ports:
       - "1433:1433"
 
+  messagebroker:
+    container_name: messagebroker
+    hostname: eshop-mq
+    environment:
+      - RABBITMQ_DEFAULT_USER=guest
+      - RABBITMQ_DEFAULT_PASS=guest
+    restart: always
+    ports:
+      - "5670:5672"
+      - "15670:15672"
+
   catalog.api:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
@@ -70,6 +81,9 @@ services:
       - ConnectionStrings__Database=Server=basketdb; Port=5432; Database=BasketDb; User Id=postgres; Password=postgres; Include Error Detail=true
       - ConnectionStrings__Redis=distributedcache:6379
       - GrpcSettings__DiscountUrl=https://discount.grpc:8081
+      - MessageBroker__Host=amqp://eshop-mq:5672
+      - MessageBroker__UserName=guest
+      - MessageBroker__Password=guest
 
       - Kestrel__Endpoints__Http__Url=http://*:8080
       - Kestrel__Endpoints__Https__Url=https://*:8081
@@ -79,6 +93,7 @@ services:
       - basketdb
       - distributedcache
       - discount.grpc
+      - messagebroker
     ports:
       - "6001:8080"
       - "6061:8081"
@@ -114,6 +129,10 @@ services:
       - ASPNETCORE_HTTP_PORTS=8080
       - ASPNETCORE_HTTPS_PORTS=8081
       - ConnectionStrings__Database=Server=orderdb; Database=OrderDb; User Id=sa; Password=Password@123; Encrypt=False; Trust Server Certificate=True
+      - MessageBroker__Host=amqp://eshop-mq:5672
+      - MessageBroker__UserName=guest
+      - MessageBroker__Password=guest
+      - FeatureManagement__OrderFullfilment=false
 
       - Kestrel__Endpoints__Http__Url=http://*:8080
       - Kestrel__Endpoints__Https__Url=https://*:8081
@@ -121,6 +140,7 @@ services:
       - Kestrel__Endpoints__Https__Certificate__Password=david
     depends_on:
       - orderdb
+      - messagebroker
     ports:
       - "6003:8080"
       - "6063:8081"
