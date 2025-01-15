@@ -1,3 +1,6 @@
+using BuildingBlocks.Messaging.Events.Product;
+using MassTransit;
+
 namespace Catalog.API.Products.DeleteProduct;
 
 public record DeleteProductCommand(Guid Id) : ICommand<DeleteProductResult>;
@@ -11,15 +14,17 @@ public class DeleteProductCommandValidator : AbstractValidator<DeleteProductComm
     }
 }
 
-internal class DeleteProductCommandHandler
-    (IDocumentSession session)
+internal class DeleteProductCommandHandler(
+    IDocumentSession session,
+    IPublishEndpoint publishEndpoint)
     : ICommandHandler<DeleteProductCommand, DeleteProductResult>
 {
     public async Task<DeleteProductResult> Handle(DeleteProductCommand command, CancellationToken cancellationToken)
     {
         session.Delete<Product>(command.Id);
         await session.SaveChangesAsync(cancellationToken);
-
+        await publishEndpoint.Publish(new ProductDeletedEvent{Id = command.Id}, cancellationToken);
+        
         return new DeleteProductResult(true);
     }
 }

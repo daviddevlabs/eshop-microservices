@@ -2,8 +2,9 @@
 
 public class Coupon
 {
-    public int Id { get; set; }
-    public string ProductName { get; set; } = default!;
-    public string Description { get; set; } = default!;
-    public int Amount { get; set; }
+    public int Id { get; init; }
+    public Guid ProductId { get; init; }
+    public string CouponCode { get; init; } = null!;
+    public string Description { get; init; } = null!;
+    public int Amount { get; init; }
 }

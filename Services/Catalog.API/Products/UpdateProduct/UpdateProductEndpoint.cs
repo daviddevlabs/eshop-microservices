@@ -1,6 +1,6 @@
 namespace Catalog.API.Products.UpdateProduct;
 
-public record UpdateProductRequest(Guid Id, string Title, string Description, decimal Price, string Category, List<string> ImageUrl, List<Specification> Specifications);
+public record UpdateProductRequest(Guid Id, string Title, string Description, decimal Price, int Quantity, string Category, List<Specification> Specifications);
 public record UpdateProductResponse(bool IsSuccess);
 
 public class UpdateProductEndpoint : ICarterModule
@@ -22,6 +22,7 @@ public class UpdateProductEndpoint : ICarterModule
         .ProducesProblem(StatusCodes.Status400BadRequest)
         .ProducesProblem(StatusCodes.Status404NotFound)
         .WithSummary("Update Product")
-        .WithDescription("Update Product");
+        .WithDescription("Update Product")
+        .RequireAuthorization("Employee");
     }
 }

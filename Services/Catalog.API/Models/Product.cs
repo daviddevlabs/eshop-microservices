@@ -2,22 +2,25 @@ namespace Catalog.API.Models;
 
 public class Product
 {
-    public Guid Id { get; set; }
-    public string Title { get; set; } = default!;
-    public string Description { get; set; } = default!;
-    public decimal Price { get; set; } = default!;
-    public string Category { get; set; } = default!;
-    public List<string> ImageUrl { get; set; } = default!;
-    public List<Specification> Specifications { get; set; } = new();
+    public Guid Id { get; init; }
+    public string Title { get; set; } = string.Empty;
+    public string Description { get; set; } = string.Empty;
+    public decimal Price { get; set; }
+    public int Quantity { get; set; }
+    public string Category { get; set; } = string.Empty;
+    public List<string> ImageUrl { get; set; } = null!;
+    public List<Specification> Specifications { get; set; } = [];
 
-    public static Product Create(string title, string description, decimal price, string category)
+    public static Product Create(string title, string description, decimal price, int quantity, string category, List<Specification> specifications)
     {
         return new Product
         {
             Title = title,
             Description = description,
             Price = price,
-            Category = category
+            Quantity = quantity,
+            Category = category,
+            Specifications = specifications
         };
     }
 
@@ -36,13 +39,11 @@ public class Product
     public void ReorderSpecification(string key, int newOrder)
     {
         var specification = Specifications.Find(s => s.Key == key);
-
-        if (specification != null)
-        {
-            Specifications.Remove(specification);
-            specification.Order = newOrder;
-            Specifications.Add(specification);
-            Specifications = Specifications.OrderBy(s => s.Order).ToList();
-        }
+        if (specification == null) return;
+        
+        Specifications.Remove(specification);
+        specification.Order = newOrder;
+        Specifications.Add(specification);
+        Specifications = Specifications.OrderBy(s => s.Order).ToList();
     }
 }

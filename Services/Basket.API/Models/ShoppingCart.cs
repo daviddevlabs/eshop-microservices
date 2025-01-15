@@ -1,14 +1,20 @@
-﻿namespace Basket.API.Models;
+﻿using System.Text.Json.Serialization;
+
+namespace Basket.API.Models;
 
 public class ShoppingCart
 {
-    public string UserName { get; set; } = default!;
-    public List<ShoppingCartItem> Items { get; set; } = new();
+    [JsonIgnore]
+    public string UserId { get; set; }
+    public List<ShoppingCartItem> Items { get; init; } = [];
+    [JsonIgnore]
+    public List<ShoppingCartItem> ItemsToRemove { get; } = [];
+    public string? CouponCode { get; set; }
     public decimal TotalPrice => Items.Sum(x => x.Price * x.Quantity);
-
-    public ShoppingCart(string userName)
+    
+    public ShoppingCart(string userId)
     {
-        UserName = userName;
+        UserId = userId;
     }
 
     // Required for Mapping

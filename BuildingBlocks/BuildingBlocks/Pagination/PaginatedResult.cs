@@ -1,8 +1,11 @@
 namespace BuildingBlocks.Pagination;
 
-public class PaginatedResult<TEntity>
-    (int pageIndex, int pageSize, long count, int totalPages, IEnumerable<TEntity> data)
-    where TEntity : class
+public class PaginatedResult<TEntity>(
+    int pageIndex,
+    int pageSize,
+    long count,
+    int totalPages,
+    IEnumerable<TEntity> data) where TEntity : class
 {
     public int PageIndex { get; } = pageIndex;
     public int PageSize { get; } = pageSize;

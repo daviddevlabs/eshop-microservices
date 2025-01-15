@@ -8,5 +8,5 @@ global using BuildingBlocks.Behaviors;
 global using BuildingBlocks.Exceptions;
 global using Marten;
 global using Basket.API.Data;
-global using Basket.API.Dtos;
+global using Basket.API.DTOs;
 global using Basket.API.Exceptions;

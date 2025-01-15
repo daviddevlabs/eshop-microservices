@@ -11,10 +11,19 @@ services:
     image: redis
 
   orderdb:
-    image: mcr.microsoft.com/mssql/server
+    image: mcr.microsoft.com/mssql/server:2022-latest
 
   messagebroker:
     image: rabbitmq:management
+
+  discount.seq:
+    image: datalust/seq:latest
+    
+  keycloak.identity:
+    image: quay.io/keycloak/keycloak:latest
+    
+  keycloak-db:
+    image: postgres
 
   catalog.api:
     image: ${DOCKER_REGISTRY-}catalogapi
@@ -55,3 +64,6 @@ services:
 volumes:
   postgres_catalog:
   postgres_basket:
+  sqlserver_data:
+  keycloak_data:
+  postgres_keycloak:

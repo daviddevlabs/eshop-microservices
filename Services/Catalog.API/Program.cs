@@ -1,3 +1,6 @@
+using BuildingBlocks.Messaging.MassTransit;
+using BuildingBlocks.Security;
+using Catalog.API.Services;
 using HealthChecks.UI.Client;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 
@@ -13,26 +16,38 @@ builder.Services.AddMediatR(config =>
     config.AddOpenBehavior(typeof(LoggingBehavior<,>));
 });
 builder.Services.AddValidatorsFromAssembly(assembly);
+TypeAdapterConfig.GlobalSettings.Default.NameMatchingStrategy(NameMatchingStrategy.Flexible).IgnoreNullValues(true);
+
+builder.Services.AddJwtAuthentication(builder.Configuration);
+builder.Services.AddAuthorizationWithRoles();
 
 //Data Services
-builder.Services.AddMarten(opts =>
+builder.Services.AddMarten(options =>
 {
-    opts.Connection(builder.Configuration.GetConnectionString("Database")!);
+    options.Connection(builder.Configuration.GetConnectionString("Database")!);
 }).UseLightweightSessions();
 
 if (builder.Environment.IsDevelopment())
     builder.Services.InitializeMartenWith<CatalogInitialData>();
 
+//Grpc Services
+builder.Services.AddGrpc();
+
+//Async Communication Services
+builder.Services.AddMessageBroker(builder.Configuration);
+
 //Cross-Cutting Services
 builder.Services.AddExceptionHandler<CustomExceptionHandler>();
-
 builder.Services.AddHealthChecks()
     .AddNpgSql(builder.Configuration.GetConnectionString("Database")!);
 
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
+app.UseAuthentication();
+app.UseAuthorization();
 app.MapCarter();
+app.MapGrpcService<ProductService>();
 app.UseExceptionHandler(options => { });
 app.UseHealthChecks("/health", new HealthCheckOptions
 {

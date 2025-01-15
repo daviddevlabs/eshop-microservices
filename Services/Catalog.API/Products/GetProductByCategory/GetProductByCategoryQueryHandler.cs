@@ -1,6 +1,6 @@
 namespace Catalog.API.Products.GetProductByCategory;
 
-public record GetProductByCategoryQuery(string Category, int? PageNumber = 1, int? PageSize = 10) : IQuery<GetProductByCategoryResult>;
+public record GetProductByCategoryQuery(string Category, int PageNumber, int PageSize) : IQuery<GetProductByCategoryResult>;
 public record GetProductByCategoryResult(PaginatedResult<Product> Products);
 
 internal class GetProductByCategoryQueryHandler
@@ -13,17 +13,17 @@ internal class GetProductByCategoryQueryHandler
             .Where(p => p.Category.Contains(query.Category))
             .LongCountAsync(cancellationToken);
 
-        var totalPages = (int)Math.Ceiling((decimal)totalCount / query.PageSize ?? 10);
+        var totalPages = (int)Math.Ceiling((decimal)totalCount / query.PageSize);
 
         var products = await session.Query<Product>()
             .Where(p => p.Category.Contains(query.Category))
-            .ToPagedListAsync(query.PageNumber ?? 1, query.PageSize ?? 10, cancellationToken);
+            .ToPagedListAsync(query.PageNumber, query.PageSize, cancellationToken);
 
 
         return new GetProductByCategoryResult(
             new PaginatedResult<Product>(
-                query.PageNumber ?? 1,
-                query.PageSize ?? 10,
+                query.PageNumber,
+                query.PageSize,
                 totalCount,
                 totalPages,
                 products));

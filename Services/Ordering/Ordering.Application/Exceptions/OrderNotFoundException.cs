@@ -2,10 +2,4 @@ using BuildingBlocks.Exceptions;
 
 namespace Ordering.Application.Exceptions;
 
-public class OrderNotFoundException : NotFoundException
-{
-    public OrderNotFoundException(Guid id) : base("Order", id)
-    {
-
-    }
-}
+public class OrderNotFoundException(Guid id) : NotFoundException("Order", id);

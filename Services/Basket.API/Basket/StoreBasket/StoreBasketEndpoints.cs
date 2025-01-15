@@ -1,7 +1,7 @@
 ﻿namespace Basket.API.Basket.StoreBasket;
 
-public record StoreBasketRequest(ShoppingCart Cart);
-public record StoreBasketResponse(string UserName);
+public record StoreBasketRequest(ShoppingCartItem Product, string Coupon);
+public record StoreBasketResponse(bool IsSuccess);
 
 public class StoreBasketEndpoints : ICarterModule
 {
@@ -15,12 +15,13 @@ public class StoreBasketEndpoints : ICarterModule
 
             var response = result.Adapt<StoreBasketResponse>();
 
-            return Results.Created($"/basket/{response.UserName}", response);
+            return Results.Ok(response);
         })
         .WithName("CreateProductById")
-        .Produces<StoreBasketResponse>(StatusCodes.Status201Created)
+        .Produces<StoreBasketResponse>(StatusCodes.Status200OK)
         .ProducesProblem(StatusCodes.Status400BadRequest)
         .WithSummary("Create Product By Id")
-        .WithDescription("Create Product By Id");
+        .WithDescription("Create Product By Id")
+        .RequireAuthorization();
     }
 }

@@ -1,4 +1,4 @@
-namespace Basket.API.Dtos;
+namespace Basket.API.DTOs;
 
 public record BasketCheckoutDto
 {

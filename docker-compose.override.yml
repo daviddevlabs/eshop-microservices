@@ -7,7 +7,6 @@ services:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
       - POSTGRES_DB=CatalogDb
-    restart: always
     ports:
       - "5400:5432"
     volumes:
@@ -19,7 +18,6 @@ services:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
       - POSTGRES_DB=BasketDb
-    restart: always
     ports:
       - "5401:5432"
     volumes:
@@ -27,7 +25,6 @@ services:
 
   distributedcache:
     container_name: distributedcache
-    restart: always
     ports:
       - "6379:6379"
 
@@ -36,9 +33,21 @@ services:
     environment:
       - ACCEPT_EULA=Y
       - SA_PASSWORD=Password@123
-    restart: always
     ports:
       - "1433:1433"
+    volumes:
+      - sqlserver_data:/var/opt/mssql
+  
+  keycloak-db:
+    container_name: KeyCloakDB
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=Password@123
+      - POSTGRES_DB=keycloak
+    ports:
+      - "5402:5432"
+#    volumes:
+#      - postgres_keycloak:/var/lib/postgresql/data/
 
   messagebroker:
     container_name: messagebroker
@@ -46,10 +55,37 @@ services:
     environment:
       - RABBITMQ_DEFAULT_USER=guest
       - RABBITMQ_DEFAULT_PASS=guest
-    restart: always
     ports:
-      - "5670:5672"
-      - "15670:15672"
+      - "5672:5672"
+      - "15672:15672"
+  
+  discount.seq:
+    container_name: Discount.Seq
+    environment:
+      - ACCEPT_EULA=Y
+    ports:
+      - "5341:5341"
+      - "80:80"
+  
+  keycloak.identity:
+    container_name: KeyCloak
+    environment:
+      KC_DB: postgres
+      KC_DB_URL_HOST: keycloak-db
+      KC_DB_URL_PORT: 5432
+      KC_DB_USERNAME: postgres
+      KC_DB_PASSWORD: Password@123
+      KC_BOOTSTRAP_ADMIN_USERNAME: admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: admin
+      KC_IMPORT: /opt/keycloak/data/import/realm-export.json
+    depends_on:
+      - keycloak-db
+    command: start-dev --import-realm
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./realm-export.json:/opt/keycloak/data/import/realm-export.json
+      - keycloak_data:/opt/keycloak/data
 
   catalog.api:
     environment:
@@ -68,7 +104,7 @@ services:
       - "6000:8080"
       - "6060:8081"
     volumes:
-      - ${HOME}/.microsoft/usersecrets/:/home/app/.microsoft/usersecrets:ro
+      - ${HOME}/.microsoft/usersecrets:/home/app/.microsoft/usersecrets:ro
       - ${HOME}/.aspnet/https:/home/app/.aspnet/https:ro
       # - ${APPDATA}/Microsoft/UserSecrets:/home/app/.microsoft/usersecrets:ro
       # - ${APPDATA}/ASP.NET/Https:/home/app/.aspnet/https:ro
@@ -98,7 +134,7 @@ services:
       - "6001:8080"
       - "6061:8081"
     volumes:
-      - ${HOME}/.microsoft/usersecrets/:/home/app/.microsoft/usersecrets:ro
+      - ${HOME}/.microsoft/usersecrets:/home/app/.microsoft/usersecrets:ro
       - ${HOME}/.aspnet/https:/home/app/.aspnet/https:ro
       # - ${APPDATA}/Microsoft/UserSecrets:/home/app/.microsoft/usersecrets:ro
       # - ${APPDATA}/ASP.NET/Https:/home/app/.aspnet/https:ro
@@ -109,6 +145,8 @@ services:
       - ASPNETCORE_HTTP_PORTS=8080
       - ASPNETCORE_HTTPS_PORTS=8081
       - ConnectionStrings__Database=Data Source=discountdb.db
+      - OTEL_EXPORTER_OTLP_ENDPOINT=HTTP://discount.seq:5341/ingest/otlp/v1/traces
+      - OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf
 
       - Kestrel__Endpoints__Http__Url=http://*:8080
       - Kestrel__Endpoints__Https__Url=https://*:8081
@@ -118,7 +156,7 @@ services:
       - "6002:8080"
       - "6062:8081"
     volumes:
-      - ${HOME}/.microsoft/usersecrets/:/home/app/.microsoft/usersecrets:ro
+      - ${HOME}/.microsoft/usersecrets:/home/app/.microsoft/usersecrets:ro
       - ${HOME}/.aspnet/https:/home/app/.aspnet/https:ro
       # - ${APPDATA}/Microsoft/UserSecrets:/home/app/.microsoft/usersecrets:ro
       # - ${APPDATA}/ASP.NET/Https:/home/app/.aspnet/https:ro
@@ -145,7 +183,7 @@ services:
       - "6003:8080"
       - "6063:8081"
     volumes:
-      - ${HOME}/.microsoft/usersecrets/:/home/app/.microsoft/usersecrets:ro
+      - ${HOME}/.microsoft/usersecrets:/home/app/.microsoft/usersecrets:ro
       - ${HOME}/.aspnet/https:/home/app/.aspnet/https:ro
       # - ${APPDATA}/Microsoft/UserSecrets:/home/app/.microsoft/usersecrets:ro
       # - ${APPDATA}/ASP.NET/Https:/home/app/.aspnet/https:ro
@@ -168,7 +206,7 @@ services:
       - "6004:8080"
       - "6064:8081"
     volumes:
-      - ${HOME}/.microsoft/usersecrets/:/home/app/.microsoft/usersecrets:ro
+      - ${HOME}/.microsoft/usersecrets:/home/app/.microsoft/usersecrets:ro
       - ${HOME}/.aspnet/https:/home/app/.aspnet/https:ro
       # - ${APPDATA}/Microsoft/UserSecrets:/home/app/.microsoft/usersecrets:ro
       # - ${APPDATA}/ASP.NET/Https:/home/app/.aspnet/https:ro
@@ -190,7 +228,7 @@ services:
       - "6005:8080"
       - "6065:8081"
     volumes:
-      - ${HOME}/.microsoft/usersecrets/:/home/app/.microsoft/usersecrets:ro
+      - ${HOME}/.microsoft/usersecrets:/home/app/.microsoft/usersecrets:ro
       - ${HOME}/.aspnet/https:/home/app/.aspnet/https:ro
       # - ${APPDATA}/Microsoft/UserSecrets:/home/app/.microsoft/usersecrets:ro
       # - ${APPDATA}/ASP.NET/Https:/home/app/.aspnet/https:ro

@@ -1,6 +1,6 @@
 namespace Catalog.API.Products.CreateProduct;
 
-public record CreateProductRequest(string Title, string Description, decimal Price, string Category, List<string> ImageUrl, List<Specification> Specifications);
+public record CreateProductRequest(string Title, string Description, decimal Price, int Quantity, string Category, List<Specification> Specifications);
 public record CreateProductResponse(Guid Id);
 
 public class CreateProductEndpoint : ICarterModule
@@ -21,6 +21,7 @@ public class CreateProductEndpoint : ICarterModule
         .Produces<CreateProductResponse>(StatusCodes.Status201Created)
         .ProducesProblem(StatusCodes.Status400BadRequest)
         .WithSummary("Create Product")
-        .WithDescription("Create Product");
+        .WithDescription("Create Product")
+        .RequireAuthorization("Employee");
     }
 }

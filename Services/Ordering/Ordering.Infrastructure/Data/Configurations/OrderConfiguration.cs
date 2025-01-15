@@ -1,8 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata.Builders;
+﻿using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Ordering.Domain.Enums;
-using Ordering.Domain.Models;
-using Ordering.Domain.ValueObjects;
 
 namespace Ordering.Infrastructure.Data.Configurations;
 
@@ -100,7 +97,7 @@ public class OrderConfiguration : IEntityTypeConfiguration<Order>
             paymentBuilder.Property(p => p.Expiration)
                 .HasMaxLength(10);
 
-            paymentBuilder.Property(p => p.CVV)
+            paymentBuilder.Property(p => p.Cvv)
                 .HasMaxLength(3);
 
             paymentBuilder.Property(p => p.PaymentMethod);

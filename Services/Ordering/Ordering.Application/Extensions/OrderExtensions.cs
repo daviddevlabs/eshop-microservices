@@ -31,11 +31,16 @@ public static class OrderExtensions
                 order.Payment.CardName,
                 order.Payment.CardNumber,
                 order.Payment.Expiration,
-                order.Payment.CVV,
+                order.Payment.Cvv,
                 order.Payment.PaymentMethod
             ),
             Status: order.Status,
-            OrderItems: order.OrderItems.Select(oi => new OrderItemDto(oi.OrderId.Value, oi.ProductId.Value, oi.Quantity, oi.Price)).ToList()
+            OrderItems: order.OrderItems.Select(oi => new OrderItemDto(
+                oi.OrderId.Value, 
+                oi.ProductId.Value,
+                oi.Quantity,
+                oi.Price)
+            ).ToList()
         ));
     }
 
@@ -68,11 +73,16 @@ public static class OrderExtensions
                 order.Payment.CardName,
                 order.Payment.CardNumber,
                 order.Payment.Expiration,
-                order.Payment.CVV,
+                order.Payment.Cvv,
                 order.Payment.PaymentMethod
             ),
             Status: order.Status,
-            OrderItems: order.OrderItems.Select(oi => new OrderItemDto(oi.OrderId.Value, oi.ProductId.Value, oi.Quantity, oi.Price)).ToList()
+            OrderItems: order.OrderItems.Select(oi => new OrderItemDto(
+                oi.OrderId.Value, 
+                oi.ProductId.Value,
+                oi.Quantity,
+                oi.Price)
+            ).ToList()
         );
     }
 }

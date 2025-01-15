@@ -7,16 +7,14 @@ namespace BuildingBlocks.Messaging.MassTransit;
 
 public static class Extensions
 {
-    public static IServiceCollection AddMessageBroker
-        (this IServiceCollection services, IConfiguration configuration, Assembly? assembly = null)
+    public static IServiceCollection AddMessageBroker(this IServiceCollection services,
+        IConfiguration configuration, Assembly? assembly = null)
     {
         services.AddMassTransit(config =>
         {
             config.SetKebabCaseEndpointNameFormatter();
-
-            if (assembly != null)
-                config.AddConsumers(assembly);
-
+            if (assembly != null) config.AddConsumers(assembly);
+            
             config.UsingRabbitMq((context, configurator) =>
             {
                 configurator.Host(new Uri(configuration["MessageBroker:Host"]!), host =>
@@ -27,7 +25,7 @@ public static class Extensions
                 configurator.ConfigureEndpoints(context);
             });
         });
-
+        
         return services;
     }
 }
