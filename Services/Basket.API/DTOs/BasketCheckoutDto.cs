@@ -2,10 +2,6 @@ namespace Basket.API.Dtos;
 
 public record BasketCheckoutDto
 {
-    public string UserName { get; set; } = default!;
-    public Guid CustomerId { get; set; } = default!;
-    public decimal TotalPrice { get; set; } = default!;
-
     // ShippingAddress and BillingAddress
     public string FirstName { get; set; } = default!;
     public string LastName { get; set; } = default!;
@@ -19,6 +15,6 @@ public record BasketCheckoutDto
     public string CardName { get; set; } = default!;
     public string CardNumber { get; set; } = default!;
     public string Expiration { get; set; } = default!;
-    public string CVV { get; set; } = default!;
+    public string Cvv { get; set; } = default!;
     public int PaymentMethod { get; set; } = default!;
 };
