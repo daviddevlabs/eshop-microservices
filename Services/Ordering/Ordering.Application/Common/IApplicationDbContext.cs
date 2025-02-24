@@ -1,4 +1,4 @@
-namespace Ordering.Application.Data;
+namespace Ordering.Application.Common;
 
 public interface IApplicationDbContext
 {

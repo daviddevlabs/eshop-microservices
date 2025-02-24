@@ -1,5 +1,6 @@
 using BuildingBlocks.Messaging.MassTransit;
 using BuildingBlocks.Security;
+using Catalog.API.Mappings;
 using Catalog.API.Services;
 using HealthChecks.UI.Client;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
@@ -16,7 +17,7 @@ builder.Services.AddMediatR(config =>
     config.AddOpenBehavior(typeof(LoggingBehavior<,>));
 });
 builder.Services.AddValidatorsFromAssembly(assembly);
-TypeAdapterConfig.GlobalSettings.Default.NameMatchingStrategy(NameMatchingStrategy.Flexible).IgnoreNullValues(true);
+TypeAdapterConfig.GlobalSettings.Scan(typeof(MappingRegister).Assembly);
 
 builder.Services.AddJwtAuthentication(builder.Configuration);
 builder.Services.AddAuthorizationWithRoles();

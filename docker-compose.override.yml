@@ -77,15 +77,23 @@ services:
       KC_DB_PASSWORD: Password@123
       KC_BOOTSTRAP_ADMIN_USERNAME: admin
       KC_BOOTSTRAP_ADMIN_PASSWORD: admin
-      KC_IMPORT: /opt/keycloak/data/import/realm-export.json
+      KK_TO_RMQ_URL: messagebroker
+      KK_TO_RMQ_PORT: 5672
+      KK_TO_RMQ_VHOST: /
+      KK_TO_RMQ_EXCHANGE: keycloak.exchange
+      KK_TO_RMQ_USERNAME: guest
+      KK_TO_RMQ_PASSWORD: guest
     depends_on:
       - keycloak-db
-    command: start-dev --import-realm
+    command:
+      - start-dev
+      - --import-realm
     ports:
       - "8080:8080"
     volumes:
-      - ./realm-export.json:/opt/keycloak/data/import/realm-export.json
-      - keycloak_data:/opt/keycloak/data
+      - ./keycloak-config/conf/keycloak.conf:/opt/keycloak/conf/keycloak.conf
+      - ./keycloak-config/data/import/realm-export.json:/opt/keycloak/data/import/realm-export.json
+      - ./keycloak-config/providers/keycloak-to-rabbit-3.0.5.jar:/opt/keycloak/providers/keycloak-to-rabbit-3.0.5.jar
 
   catalog.api:
     environment:

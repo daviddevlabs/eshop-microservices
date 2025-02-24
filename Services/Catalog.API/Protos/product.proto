@@ -4,12 +4,19 @@ package catalog;
 
 service ProductProtoService {
   rpc GetProduct (GetProductRequest) returns (GetProductResponse);
+  rpc GetProductsByIds(GetProductsByIdsRequest) returns (GetProductsByIdsResponse);
+}
+
+message GetProductsByIdsRequest {
+  repeated string ids = 1;
+}
+message GetProductsByIdsResponse {
+  repeated ProductModel products = 1;
 }
 
 message GetProductRequest {
   string ProductId = 1;
 }
-
 message GetProductResponse {
   ProductModel product = 1;
 }
@@ -18,4 +25,5 @@ message ProductModel {
   string ProductId = 1;
   int32 Quantity = 2;
   string Price = 3;
+  string Title = 4;
 }

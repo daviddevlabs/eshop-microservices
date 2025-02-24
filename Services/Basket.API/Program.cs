@@ -1,6 +1,6 @@
-using Basket.API.Services;
 using BuildingBlocks.Exceptions.Handler;
 using BuildingBlocks.Messaging.MassTransit;
+using BuildingBlocks.Resilience;
 using BuildingBlocks.Security;
 using Catalog.API;
 using Discount.Grpc;
@@ -39,7 +39,7 @@ builder.Services.AddMarten(options =>
 }).UseLightweightSessions();
 
 builder.Services.AddScoped<IBasketRepository, BasketRepository>();
-builder.Services.Decorate<IBasketRepository, CachedBasketRepository>();
+//builder.Services.Decorate<IBasketRepository, CachedBasketRepository>();
 #pragma warning disable EXTEXP0018
 builder.Services.AddHybridCache(options =>
 {

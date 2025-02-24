@@ -1,5 +1,5 @@
 ﻿using System.Reflection;
-using Ordering.Application.Data;
+using Ordering.Application.Common;
 
 namespace Ordering.Infrastructure.Data;
 public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) 
