@@ -13,7 +13,7 @@ COPY ["Services/Ordering/Ordering.Domain/Ordering.Domain.csproj","Services/Order
 COPY ["Services/Ordering/Ordering.Infrastructure/Ordering.Infrastructure.csproj","Services/Ordering/Ordering.Infrastructure/"]
 COPY ["BuildingBlocks/BuildingBlocks/BuildingBlocks.csproj", "BuildingBlocks/BuildingBlocks/"]
 COPY ["BuildingBlocks/BuildingBlocks.Messaging/BuildingBlocks.Messaging.csproj", "BuildingBlocks/BuildingBlocks.Messaging/"]
-RUN dotnet restore "./Services/Ordering/Ordering.API/./Ordering.API.csproj"
+RUN dotnet restore "./Services/Ordering/Ordering.API/Ordering.API.csproj"
 COPY . .
 WORKDIR "/src/Services/Ordering/Ordering.API/"
 RUN dotnet build "./Ordering.API.csproj" -c $BUILD_CONFIGURATION -o /app/build

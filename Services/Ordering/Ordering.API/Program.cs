@@ -1,3 +1,4 @@
+using BuildingBlocks.Security;
 using Ordering.API;
 using Ordering.Application.Config;
 using Ordering.Infrastructure.Config;
@@ -11,12 +12,16 @@ builder.Services
     .AddInfrastructureServices(builder.Configuration, builder.Environment, applicationAssembly)
     .AddApiServices(builder.Configuration);
 
-var app = builder.Build();
+builder.Services.AddJwtAuthentication(builder.Configuration);
+builder.Services.AddAuthorizationWithRoles();
 
+var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     await app.InitialiseDatabaseAsync();
 }
 
 app.UseApiServices();
+app.UseAuthentication();
+app.UseAuthorization();
 app.Run();

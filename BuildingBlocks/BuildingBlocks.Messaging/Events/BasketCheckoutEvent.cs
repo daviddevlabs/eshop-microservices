@@ -3,9 +3,9 @@ namespace BuildingBlocks.Messaging.Events;
 public record BasketCheckoutEvent : IntegrationEvent
 {
     public Guid UserId { get; set; }
-    public string UserName { get; set; } = default!; // <---
+    public string UserName { get; set; } = default!;
     public decimal TotalPrice { get; set; }
-    public List<ShoppingCartItem> Items { get; set; } = [];
+    public List<ShoppingCartProducts> Products { get; set; } = [];
 
     // ShippingAddress and BillingAddress
     public string FirstName { get; set; } = default!;
@@ -24,9 +24,9 @@ public record BasketCheckoutEvent : IntegrationEvent
     public int PaymentMethod { get; set; } = default!;
 }
 
-public class ShoppingCartItem
+public class ShoppingCartProducts
 {
     public Guid ProductId { get; set; }
-    public int Quantity { get; set; } 
+    public int Quantity { get; set; }
     public decimal Price { get; set; }
 }

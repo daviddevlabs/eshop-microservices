@@ -1,3 +1,6 @@
+using BuildingBlocks.Messaging.Events.Product;
+using BuildingBlocks.Messaging.Product;
+
 namespace Catalog.API.Mappings;
 
 public class MappingRegister : IRegister

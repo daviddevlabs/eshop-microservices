@@ -23,6 +23,6 @@ public class UpdateProductEndpoint : ICarterModule
         .ProducesProblem(StatusCodes.Status404NotFound)
         .WithSummary("Update Product")
         .WithDescription("Update Product")
-        .RequireAuthorization("Employee");
+        .RequireAuthorization("EmployeePolicy");
     }
 }

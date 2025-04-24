@@ -1,7 +1,7 @@
 ﻿using System.Net;
 using System.Reflection;
+using BuildingBlocks.Messaging.Product;
 using BuildingBlocks.Resilience;
-using Catalog.API;
 using MassTransit;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -12,7 +12,6 @@ using Ordering.Infrastructure.Caching;
 using Ordering.Infrastructure.GrpcServices;
 using Ordering.Infrastructure.Identity;
 using Polly;
-using Polly.Extensions.Http;
 using RabbitMQ.Client;
 using StackExchange.Redis;
 
@@ -28,7 +27,7 @@ public static class DependencyInjection
     {
         services.AddScoped<AuditableEntityInterceptor>();
         services.AddScoped<DispatchDomainEventsInterceptor>();
-        
+
         services.AddDbContext<ApplicationDbContext>((sp, options) =>
         {
             var entityInterceptor = sp.GetRequiredService<AuditableEntityInterceptor>();
@@ -38,22 +37,22 @@ public static class DependencyInjection
             options.UseSqlServer(configuration.GetConnectionString("Database"));
         });
         services.AddScoped<IApplicationDbContext, ApplicationDbContext>();
-        
-        services.AddHttpClient<IKeycloakService, KeycloakService>().AddPolicyHandler(_ => 
+
+        services.AddHttpClient<IKeycloakService, KeycloakService>().AddPolicyHandler(_ =>
             Policy.HandleResult<HttpResponseMessage>(result =>
                     result.StatusCode is HttpStatusCode.InternalServerError or HttpStatusCode.ServiceUnavailable)
             .WaitAndRetryAsync(5, retryCount => TimeSpan.FromSeconds(Math.Pow(2, retryCount)))
         );
         services.Configure<KeycloakOptions>(configuration.GetSection("Keycloak"));
 
-        services.AddSingleton<IConnectionMultiplexer>(_ => 
+        services.AddSingleton<IConnectionMultiplexer>(_ =>
             ConnectionMultiplexer.Connect(configuration.GetConnectionString("Redis")!));
         services.AddScoped<ICacheService, RedisCacheService>();
-        
+
         services.AddResilienceGrpcClient<ProductProtoService.ProductProtoServiceClient>
             (configuration, environment, "GrpcSettings:CatalogUrl");
         services.AddScoped<IProductGrpcService, ProductGrpcService>();
-        
+
         services.AddMassTransit(config =>
         {
             config.SetKebabCaseEndpointNameFormatter();
@@ -69,7 +68,7 @@ public static class DependencyInjection
                 {
                     endpoint.Bind("keycloak.exchange", callback =>
                     {
-                        callback.RoutingKey = " KK.EVENT.CLIENT.eshop.SUCCESS.*.REGISTER";
+                        callback.RoutingKey = "KK.EVENT.CLIENT.eshop.SUCCESS.*.REGISTER";
                         callback.ExchangeType = ExchangeType.Topic;
                     });
                     endpoint.ClearSerialization();
@@ -79,7 +78,7 @@ public static class DependencyInjection
                 configurator.ConfigureEndpoints(context);
             });
         });
-        
+
         return services;
     }
 }

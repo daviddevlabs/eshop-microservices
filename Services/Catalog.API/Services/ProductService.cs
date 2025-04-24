@@ -1,6 +1,6 @@
 using System.Globalization;
 using Grpc.Core;
-using JasperFx.Core;
+using BuildingBlocks.Messaging.Product;
 
 namespace Catalog.API.Services;
 
@@ -10,14 +10,23 @@ public class ProductService(IDocumentSession session, ILogger<ProductService> lo
     public override async Task<GetProductResponse?> GetProduct(GetProductRequest request, ServerCallContext context)
     {
         var product = await session.LoadAsync<Product>(Guid.Parse(request.ProductId));
-        if (product is null) return new GetProductResponse { Product = null };
-        
+        if (product is null)
+        {
+            logger.LogWarning("Product with ID {ProductId} not found", request.ProductId);
+            return new GetProductResponse
+            {
+                Product = null,
+                ErrorMessage = $"Product with ID {request.ProductId} not found."
+            };
+        }
+
         logger.LogInformation("Product is retrieved: {@product}", product);
         return new GetProductResponse
         {
             Product = new ProductModel
             {
                 ProductId = product.Id.ToString(),
+                Title = product.Title,
                 Quantity = product.Quantity,
                 Price = product.Price.ToString(CultureInfo.InvariantCulture)
             }

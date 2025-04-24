@@ -1,6 +1,6 @@
 ﻿namespace Basket.API.Basket.StoreBasket;
 
-public record StoreBasketRequest(ShoppingCartItem Product, string Coupon);
+public record StoreBasketRequest(CartProductDto Product, string Coupon);
 public record StoreBasketResponse(bool IsSuccess);
 
 public class StoreBasketEndpoints : ICarterModule

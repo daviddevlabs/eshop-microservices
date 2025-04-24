@@ -1,6 +1,6 @@
-using System.Security.Claims;
 using System.Text.Json.Nodes;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.Extensions.Configuration;
 
 namespace BuildingBlocks.Security;
 
@@ -16,20 +16,22 @@ public class RoleRequirement(UserRole role) : IAuthorizationRequirement
     public UserRole Role { get; } = role;
 }
 
-public class RoleRequirementHandler : AuthorizationHandler<RoleRequirement>
+public class RoleRequirementHandler(IConfiguration config) : AuthorizationHandler<RoleRequirement>
 {
     protected override Task HandleRequirementAsync(AuthorizationHandlerContext context, RoleRequirement requirement)
-    {
-        var realmRoles = context.User.Claims.FirstOrDefault(c => c.Type == "realm_access")?.Value;
-        if (realmRoles == null) return Task.CompletedTask;
+    {         
+        var userRoles = context.User.Claims.FirstOrDefault(c => c.Type == "resource_access")?.Value;
+        if (userRoles is null) return Task.CompletedTask;
    
-        var resourceRolesJson = JsonNode.Parse(realmRoles);
-        if (resourceRolesJson?["roles"] is not JsonArray roles) return Task.CompletedTask;
+        var resourceRoles = JsonNode.Parse(userRoles);
+
+        var roles = resourceRoles?[config["Authentication:ClientId"]!]?["roles"]?.AsArray();
+        if (roles is null) return Task.CompletedTask;
         
         var role = roles.FirstOrDefault(x => 
-            string.Equals(x?.ToString(), requirement.Role.ToString(), StringComparison.CurrentCultureIgnoreCase));
+            string.Equals(x?.ToString(), requirement.Role.ToString(), StringComparison.OrdinalIgnoreCase));
         
-        if(role != null) context.Succeed(requirement);
+        if(role is not null) context.Succeed(requirement);
 
         return Task.CompletedTask;
     }

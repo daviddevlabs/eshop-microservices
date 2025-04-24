@@ -35,7 +35,7 @@ if (builder.Environment.IsDevelopment())
 builder.Services.AddGrpc();
 
 //Async Communication Services
-builder.Services.AddMessageBroker(builder.Configuration);
+builder.Services.AddMessageBroker(builder.Configuration, assembly);
 
 //Cross-Cutting Services
 builder.Services.AddExceptionHandler<CustomExceptionHandler>();

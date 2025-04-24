@@ -1,6 +1,6 @@
 syntax = "proto3";
-option csharp_namespace = "Catalog.API";
-package catalog;
+option csharp_namespace = "BuildingBlocks.Messaging.Product";
+package catalogService;
 
 service ProductProtoService {
   rpc GetProduct (GetProductRequest) returns (GetProductResponse);
@@ -18,7 +18,8 @@ message GetProductRequest {
   string ProductId = 1;
 }
 message GetProductResponse {
-  ProductModel product = 1;
+  ProductModel Product = 1;
+  string ErrorMessage = 2;
 }
 
 message ProductModel {

@@ -5,8 +5,9 @@ using Ordering.Domain.Enums;
 
 namespace Ordering.Application.Orders.EventHandlers.Integration;
 
-public class BasketCheckoutEventHandler(ILogger<BasketCheckoutEventHandler> logger, ISender sender)
-    : IConsumer<BasketCheckoutEvent>
+public class BasketCheckoutEventHandler(
+    ILogger<BasketCheckoutEventHandler> logger,
+    ISender sender) : IConsumer<BasketCheckoutEvent>
 {
     public async Task Consume(ConsumeContext<BasketCheckoutEvent> context)
     {
@@ -31,7 +32,7 @@ public class BasketCheckoutEventHandler(ILogger<BasketCheckoutEventHandler> logg
             BillingAddress: addressDto,
             Payment: paymentDto,
             Status: OrderStatus.Pending,
-            OrderItems: message.Items.Select(i => new OrderItemDto(
+            OrderItems: message.Products.Select(i => new OrderItemDto(
                 orderId,
                 i.ProductId,
                 i.Quantity,

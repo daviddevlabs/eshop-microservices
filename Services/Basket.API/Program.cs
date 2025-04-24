@@ -1,9 +1,9 @@
 using BuildingBlocks.Exceptions.Handler;
+using BuildingBlocks.Messaging.Discount;
 using BuildingBlocks.Messaging.MassTransit;
+using BuildingBlocks.Messaging.Product;
 using BuildingBlocks.Resilience;
 using BuildingBlocks.Security;
-using Catalog.API;
-using Discount.Grpc;
 using HealthChecks.UI.Client;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
@@ -40,7 +40,6 @@ builder.Services.AddMarten(options =>
 
 builder.Services.AddScoped<IBasketRepository, BasketRepository>();
 //builder.Services.Decorate<IBasketRepository, CachedBasketRepository>();
-#pragma warning disable EXTEXP0018
 builder.Services.AddHybridCache(options =>
 {
     options.DefaultEntryOptions = new HybridCacheEntryOptions
@@ -49,7 +48,6 @@ builder.Services.AddHybridCache(options =>
         Expiration = TimeSpan.FromMinutes(5)
     };
 });
-#pragma warning restore EXTEXP0018
 builder.Services.AddStackExchangeRedisCache(options =>
 {
     options.Configuration = builder.Configuration.GetConnectionString("Redis");

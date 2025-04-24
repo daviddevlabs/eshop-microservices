@@ -1,4 +1,5 @@
-﻿using Discount.Grpc.Data;
+﻿using BuildingBlocks.Messaging.Discount;
+using Discount.Grpc.Data;
 using Discount.Grpc.Models;
 using Grpc.Core;
 using Mapster;
@@ -6,15 +7,26 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Discount.Grpc.Services;
 
-public class DiscountService(DiscountContext dbContext, ILogger<DiscountService> logger) 
-    : DiscountProtoService.DiscountProtoServiceBase
+public class DiscountService(
+    DiscountContext dbContext,
+    ILogger<DiscountService> logger
+    ) : DiscountProtoService.DiscountProtoServiceBase
 {
+    public override async Task<GetAllResponse> GetDiscountList(GetAllRequest request, ServerCallContext context)
+    {
+        var coupons = await dbContext.Coupons.ToListAsync();
+        var response = new GetAllResponse();
+
+        response.Discounts.AddRange(coupons.Adapt<List<CouponModel>>());
+        return response;
+    }
+
     public override async Task<CouponModel?> GetDiscount(GetDiscountRequest request, ServerCallContext context)
     {
-        var coupon = await dbContext.Coupons.FirstOrDefaultAsync(x => 
-            x.CouponCode == request.CouponCode && x.ProductId == Guid.Parse(request.ProductId));
+        var coupon = await dbContext.Coupons.FirstOrDefaultAsync(coupon => coupon.CouponCode == request.CouponCode &&
+            coupon.ProductId == Guid.Parse(request.ProductId));
 
-        if (coupon is null) return new CouponModel {Amount = 0};
+        if (coupon is null) return new CouponModel();
         
         logger.LogInformation("Discount is retrieved for: {@coupon}", coupon);
 

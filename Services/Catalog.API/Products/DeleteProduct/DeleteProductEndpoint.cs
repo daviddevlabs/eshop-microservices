@@ -20,6 +20,6 @@ public class DeleteProductEndpoint : ICarterModule
         .ProducesProblem(StatusCodes.Status404NotFound)
         .WithSummary("Delete Product")
         .WithDescription("Delete Product")
-        .RequireAuthorization("Employee");
+        .RequireAuthorization("EmployeePolicy");
     }
 }

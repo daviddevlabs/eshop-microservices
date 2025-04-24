@@ -1,5 +1,6 @@
-﻿using BuildingBlocks.Security;
-using Catalog.API;
+﻿using BuildingBlocks.Messaging.Product;
+using BuildingBlocks.Security;
+
 using Microsoft.Extensions.Caching.Hybrid;
 
 namespace Basket.API.Basket.GetBasket;
@@ -29,9 +30,9 @@ public class GetBasketQueryHandler(
             cancellationToken: cancellationToken);
 
             if (cachedProduct.Product is null) continue;
-            item.QuantityAvailable = cachedProduct.Product.Quantity;
+            item.Title = cachedProduct.Product.Title;
+            item.QuantityAvaible = cachedProduct.Product.Quantity;
             item.Price = decimal.Parse(cachedProduct.Product.Price);
-            item.IsAvailable = cachedProduct.Product.Quantity > 0;
         }
         return new GetBasketResult(basket);
     }

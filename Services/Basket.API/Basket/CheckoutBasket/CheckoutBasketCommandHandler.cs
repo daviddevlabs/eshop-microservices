@@ -1,10 +1,9 @@
+using BuildingBlocks.Messaging.Discount;
 using BuildingBlocks.Messaging.Events;
+using BuildingBlocks.Messaging.Product;
 using BuildingBlocks.Security;
-using Catalog.API;
-using Discount.Grpc;
 using MassTransit;
 using Microsoft.Extensions.Caching.Hybrid;
-using ShoppingCartItem = BuildingBlocks.Messaging.Events.ShoppingCartItem;
 
 namespace Basket.API.Basket.CheckoutBasket;
 
@@ -31,57 +30,69 @@ public class CheckoutBasketCommandHandler(
     public async Task<CheckoutBasketResult> Handle(CheckoutBasketCommand command, CancellationToken cancellationToken)
     {
         var basket = await repository.GetBasket(userContext.GetUserId(), cancellationToken);
-        if(basket is null) return new CheckoutBasketResult(false);
+        if (basket is null) return new CheckoutBasketResult(false);
 
-        await DeductDiscount(basket, cancellationToken);
-        if(basket.Items.Count == 0) return new CheckoutBasketResult(false);
-        
+        await DeductCartItems(basket, cancellationToken);
+        if (basket.Items.Count == 0) return new CheckoutBasketResult(false);
+
         var eventMessage = command.BasketCheckoutDto.Adapt<BasketCheckoutEvent>();
         eventMessage.UserId = Guid.Parse(basket.UserId);
-        eventMessage.UserName = "Bob";
-        eventMessage.Items = basket.Items.Adapt<List<ShoppingCartItem>>();
-        eventMessage.TotalPrice = eventMessage.Items.Sum(x => x.Price * x.Quantity);
-        
+        eventMessage.UserName = userContext.GetUserName();
+        eventMessage.Products = basket.Items.Adapt<List<ShoppingCartProducts>>();
+        eventMessage.TotalPrice = eventMessage.Products.Sum(x => x.Price * x.Quantity);
+
         await publishEndpoint.Publish(eventMessage, cancellationToken);
-        
         await repository.DeleteBasket(userContext.GetUserId(), cancellationToken);
+
         return new CheckoutBasketResult(true);
     }
-    
-    private async Task DeductDiscount(ShoppingCart cart, CancellationToken cancellationToken)
+
+    private async Task DeductCartItems(ShoppingCart cart, CancellationToken cancellationToken)
     {
+        var itemsToRemove = new List<ShoppingCartItem>();
+
         foreach (var item in cart.Items)
         {
-            var cachedProduct = await cache.GetOrCreateAsync($"products-{item.ProductId}", async _ => 
-                await productProto.GetProductAsync(new GetProductRequest {
-                    ProductId = item.ProductId.ToString()
-                }, cancellationToken: cancellationToken), 
-            tags: ["products"], 
-            cancellationToken: cancellationToken);
-            
-            if (cachedProduct.Product == null)
+            var cachedProduct = await GetProductFromCacheAsync(item.ProductId, cancellationToken);
+            if (cachedProduct.Product == null || cachedProduct.Product.Quantity < item.Quantity)
             {
-                cart.ItemsToRemove.Add(item);
+                itemsToRemove.Add(item);
                 continue;
             }
-            
-            item.Price = decimal.Parse(cachedProduct.Product.Price);
+
+            cachedProduct.Product.Quantity -= item.Quantity;
+            await cache.SetAsync($"products-{cachedProduct.Product.ProductId}", cachedProduct, cancellationToken: cancellationToken);
+
+            if (decimal.TryParse(cachedProduct.Product.Price, out var price)) item.Price = price;
             if (string.IsNullOrEmpty(cart.CouponCode)) continue;
-            
-            var cachedCoupon = await cache.GetOrCreateAsync($"coupons-{item.ProductId}-{cart.CouponCode}", async _ => 
-                await discountProto.GetDiscountAsync(new GetDiscountRequest { 
-                    ProductId = item.ProductId.ToString(),
-                    CouponCode = cart.CouponCode 
-                }, cancellationToken: cancellationToken),
-            tags: ["coupons"], 
-            cancellationToken: cancellationToken);
-            
-            if(cachedCoupon.Amount != 0) item.Price -= cachedCoupon.Amount;
+
+            var cachedCoupon = await GetDiscountFromCacheAsync(item.ProductId, cart.CouponCode, cancellationToken);
+            if (cachedCoupon != null) item.Price -= cachedCoupon.Amount;
         }
-        
-        foreach (var item in cart.ItemsToRemove)
-        {
-            cart.Items.Remove(item);
-        }
+
+        foreach (var item in itemsToRemove) cart.Items.Remove(item);
+    }
+
+    private async Task<GetProductResponse> GetProductFromCacheAsync(Guid productId, CancellationToken token)
+    {
+        return await cache.GetOrCreateAsync($"products-{productId}",
+            async _ => await productProto.GetProductAsync(new GetProductRequest
+            {
+                ProductId = productId.ToString()
+            }, cancellationToken: token),
+        tags: ["products"],
+        cancellationToken: token);
+    }
+
+    private async Task<CouponModel?> GetDiscountFromCacheAsync(Guid productId, string couponCode, CancellationToken token)
+    {
+        return await cache.GetOrCreateAsync($"coupons-{productId}-{couponCode}",
+            async _ => await discountProto.GetDiscountAsync(new GetDiscountRequest
+            {
+                ProductId = productId.ToString(),
+                CouponCode = couponCode
+            }, cancellationToken: token),
+        tags: ["coupons"],
+        cancellationToken: token);
     }
 }

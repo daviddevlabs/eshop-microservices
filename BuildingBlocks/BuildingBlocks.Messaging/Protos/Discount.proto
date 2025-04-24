@@ -1,0 +1,74 @@
+syntax = "proto3";
+option csharp_namespace = "BuildingBlocks.Messaging.Discount";
+import "google/api/annotations.proto";
+package discountService;
+
+service DiscountProtoService {
+
+    rpc GetDiscountList(GetAllRequest) returns (GetAllResponse) {
+        option (google.api.http) = {
+            get: "/v1/coupon"
+        };
+    }
+
+    rpc GetDiscount (GetDiscountRequest) returns (CouponModel) {
+        option (google.api.http) = {
+            get: "/v1/coupon/{CouponCode}/{ProductId}"
+        };
+    }
+
+    rpc CreateDiscount (CreateDiscountRequest) returns (CouponModel) {
+        option (google.api.http) = {
+            post: "/v1/coupon",
+            body: "*"
+        };
+    }
+
+    rpc UpdateDiscount (UpdateDiscountRequest) returns (CouponModel) {
+        option (google.api.http) = {
+            put: "/v1/coupon",
+            body: "*"
+        };
+    }
+
+    rpc DeleteDiscount (DeleteDiscountRequest) returns (DeleteDiscountResponse) {
+        option (google.api.http) = {
+            delete: "/v1/coupon/{DiscountId}"
+        };
+    }
+}
+
+message GetAllRequest {}
+
+message GetAllResponse {
+    repeated CouponModel discounts = 1;
+}
+
+message GetDiscountRequest {
+    string CouponCode = 1;
+    string ProductId = 2;
+}
+
+message CouponModel {
+    int32 Id = 1;
+    string ProductId = 2;
+    string CouponCode = 3;
+    string Description = 4;
+    int32 Amount = 5;
+}
+
+message CreateDiscountRequest {
+    CouponModel coupon = 1;
+}
+
+message UpdateDiscountRequest {
+    CouponModel coupon = 1;
+}
+
+message DeleteDiscountRequest {
+    int32 DiscountId = 1;
+}
+
+message DeleteDiscountResponse {
+    bool success = 1;
+}

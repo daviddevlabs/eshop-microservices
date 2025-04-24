@@ -20,7 +20,9 @@ builder.Services.AddMediatR(config =>
     config.AddOpenBehavior(typeof(RequestLoggingPipelineBehavior<,>));
 });
 
-builder.Services.AddGrpc();
+builder.Services.AddGrpc()
+    .AddJsonTranscoding();
+
 builder.Services.AddDbContext<DiscountContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("Database")));
 
